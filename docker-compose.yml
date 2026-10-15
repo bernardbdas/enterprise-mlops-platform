@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mlops-controller:
+    build: .
+    container_name: enterprise-mlops-controller
+    ports:
+      - "8004:8004"
+    environment:
+      - KUBERNETES_SERVICE_HOST=127.0.0.1
+      - ARGO_SERVER=argo-server:2746
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8004/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

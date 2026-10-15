@@ -1,0 +1,33 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "enterprise-classifier"
+  namespace: "mlops-serving"
+  annotations:
+    serving.kserve.io/enable-prometheus-scraping: "true"
+    sidecar.istio.io/inject: "true"
+spec:
+  predictor:
+    minReplicas: 2
+    maxReplicas: 10
+    scaleTarget: 80
+    scaleMetric: concurrency
+    model:
+      modelFormat:
+        name: mlflow
+      storageUri: "s3://production-enterprise-model-store-us-east-1/models/classifier/latest"
+      resources:
+        requests:
+          cpu: "2"
+          memory: 4Gi
+        limits:
+          cpu: "4"
+          memory: 8Gi
+  transformer:
+    containers:
+      - image: "ghcr.io/bernard/mlops-transformer:latest"
+        name: "kserve-transformer"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: 1Gi
